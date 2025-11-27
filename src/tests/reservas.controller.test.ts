@@ -2,12 +2,13 @@ import request from "supertest"
 import { MongoMemoryServer } from "mongodb-memory-server"
 import mongoose from "mongoose"
 import app from "../server"
-import { crearLibro } from "../libros/actions/crear.action"
 
 let mongo: MongoMemoryServer
 let userId = ""
 let token = ""
 let libroId = ""
+let libroId2 = ""
+let libroId3 = ""
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create()
@@ -39,8 +40,35 @@ beforeAll(async () => {
       editorial: "Planeta"
     })
 
+      
+  const libro2 = await request(app)
+    .post("/api/libros/crear")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      nombre: "Libro X2",
+      autor: "Autor Z2",
+      genero: "Terror",
+      fechaPublicacion: "2020-01-01",
+      editorial: "Planeta2",
+      activo:false
+    })
+
+    
+  const libro3 = await request(app)
+    .post("/api/libros/crear")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      nombre: "Libro X3",
+      autor: "Autor Z3",
+      genero: "Terror",
+      fechaPublicacion: "2020-01-01",
+      editorial: "Planeta3",
+      disponible: false
+    })
 
   libroId = libro.body._id
+  libroId2 = libro2.body._id
+  libroId3 = libro3.body._id
 
 })
 
@@ -50,6 +78,43 @@ afterAll(async () => {
 })
 
 describe("Controlador Reservas", () => {
+
+
+  test("Crear reserva con id falso", async () => {
+    const res = await request(app)
+      .post("/api/reservas/reservar")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        libroId:"69276947216bb2c11954712c",
+        fechaEntrega: "2025-01-01"
+      })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe("Libro no encontrado")
+  })
+
+  test("Crear reserva con libro no activo", async () => {
+    const res = await request(app)
+      .post("/api/reservas/reservar")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        libroId:libroId2,
+        fechaEntrega: "2025-01-01"
+      })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe("El libro no está activo")
+  })
+
+    test("Crear reserva con libro no disponible", async () => {
+    const res = await request(app)
+      .post("/api/reservas/reservar")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        libroId:libroId3,
+        fechaEntrega: "2025-01-01"
+      })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe("El libro no está disponible")
+  })
 
   test("Crear reserva", async () => {
     const res = await request(app)
@@ -61,6 +126,18 @@ describe("Controlador Reservas", () => {
       })
     expect(res.status).toBe(200)
     expect(res.body.libro).toBe(libroId)
+  })
+
+  test("Crear reserva luego de reservar este mismo", async () => {
+    const res = await request(app)
+      .post("/api/reservas/reservar")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        libroId,
+        fechaEntrega: "2025-01-01"
+      })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe("El libro no está disponible")
   })
 
   test("Historial por libro", async () => {
@@ -88,6 +165,18 @@ describe("Controlador Reservas", () => {
       .send({ libroId })
 
     expect(res.status).toBe(200)
+  })
+  
+  test("Volver a crear reserva luego de devolver este mismo", async () => {
+    const res = await request(app)
+      .post("/api/reservas/reservar")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        libroId,
+        fechaEntrega: "2025-01-01"
+      })
+    expect(res.status).toBe(200)
+    expect(res.body.libro).toBe(libroId)
   })
 
 })
