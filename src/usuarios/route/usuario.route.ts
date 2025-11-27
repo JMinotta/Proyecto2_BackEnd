@@ -1,11 +1,12 @@
-import { Router } from "express";
-import { UserController } from "../controller/usuario.controller";
+import { Router } from "express"
+import { UsuarioController } from "../controller/usuario.controller"
+import { authenticate, verPermisos} from "../../middleware/autenticar"     
+const usuarioRoute = Router()
 
-const usuarioRoute = Router();
+usuarioRoute.post("/registrar", UsuarioController.registrar)
+usuarioRoute.post("/login", UsuarioController.login)
+usuarioRoute.get("/buscar/:id", authenticate,verPermisos("verUsuarios"), UsuarioController.getUsuario)
+usuarioRoute.put("/actualizar/:id", authenticate,verPermisos("modificarUsuarios"), UsuarioController.actualizar)
+usuarioRoute.delete("/eliminar/:id",authenticate,verPermisos("inhabilitarUsuarios"), UsuarioController.eliminar)
 
-usuarioRoute.post("/registrar", UserController.registrar);
-usuarioRoute.post("/login", UserController.login);
-usuarioRoute.put("/actualizar/:id", UserController.actualizar);
-usuarioRoute.delete("/eliminar/:id", UserController.eliminar);
-
-export default usuarioRoute;
+export default usuarioRoute

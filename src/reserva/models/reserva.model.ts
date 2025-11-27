@@ -1,19 +1,19 @@
-import { Schema, model} from "mongoose";
+import { Schema, model} from "mongoose"
 
 type ReservationType = {
-  usuario: Schema.Types.ObjectId;
-  libro: Schema.Types.ObjectId;
-  fechaReserva: Date;
-  fechaEntrega: Date | null;
+  usuario: Schema.Types.ObjectId | string
+  libro: Schema.Types.ObjectId | string
+  fechaReserva: Date
+  fechaEntrega: Date | null
 }
 
 const ReservationSchema = new Schema<ReservationType>({
-  usuario: { type: Schema.Types.ObjectId, ref: "User" },
-  libro: { type: Schema.Types.ObjectId, ref: "Book" },
+  usuario: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  libro: { type: Schema.Types.ObjectId, ref: "Book", required: true },
   fechaReserva: { type: Date, default: Date.now },
-  fechaEntrega: Date
-});
+  fechaEntrega: {type: Date, required: true}
+})
 
-const ReservationModel = model<ReservationType>("Reservation", ReservationSchema);
+const ReservationModel = model<ReservationType>("Reservation", ReservationSchema)
 
 export {ReservationModel, ReservationSchema, ReservationType}

@@ -9,21 +9,23 @@ type UserType = {
     modificarLibros: boolean
     borrarLibros: boolean
     modificarUsuarios: boolean
-    inhabilitarUsuarios: boolean
+    inhabilitarUsuarios: boolean,
+    verUsuarios: boolean
   }
   activo: boolean
 }
 
 const UserSchema = new Schema<UserType>({
-  nombre: String,
-  email: { type: String, unique: true },
-  password: String,
+  nombre: {type: String, required: true},
+  email: { type: String, required: true, unique: true },
+  password: {type: String, required: true},
   permisos: {
-    crearLibros: Boolean,
-    modificarLibros: Boolean,
-    borrarLibros: Boolean,
-    modificarUsuarios: Boolean,
-    inhabilitarUsuarios: Boolean
+    crearLibros: { type: Boolean, default: false}, 
+    modificarLibros: { type: Boolean, default: false},
+    borrarLibros: { type: Boolean, default: false},
+    modificarUsuarios: { type: Boolean, default: false },
+    inhabilitarUsuarios: { type: Boolean, default: false },
+    verUsuarios: { type: Boolean, default: false }
   },
   activo: { type: Boolean, default: true }
 })
