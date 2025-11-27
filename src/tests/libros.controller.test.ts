@@ -131,7 +131,7 @@ describe("Controlador Libros", () => {
     expect(res.body.nombre).toBe("Libro Editado")
   })
 
-  test("Eliminar libro", async () => {
+  test("Eliminar libro sin permiso", async () => {
     const res = await request(app)
       .delete(`/api/libros/eliminar/${libroId}`)
       .set("Authorization", `Bearer ${token2}`)
